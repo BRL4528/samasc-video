@@ -16,13 +16,13 @@ $(document).ready(function () {
   //     if (request.teste) sendResponse(request.teste);
   //   });
 
-  chrome.tabs.getSelected(null, function (tab) {
-    var link = document.createElement('a');
-    link.href = tab.url;
-    console.log('teste', tab);
+  // chrome.tabs.getSelected(null, function (tab) {
+  //   var link = document.createElement('a');
+  //   link.href = tab.url;
+  //   console.log('teste', tab);
 
-    $('#teste').html('host : ' + link.hostname);
-  });
+  //   $('#teste').html('host : ' + link.hostname);
+  // });
 
   // Get default settings (set by the user)
   chrome.storage.sync.get(null, function (result) {

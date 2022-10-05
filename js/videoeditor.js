@@ -20,6 +20,11 @@ $(document).ready(function () {
   $('#g-savetodrive').attr('src', url);
   $('#format-select').niceSelect();
 
+  // //set Title for processes
+  // chrome.storage.local.get(['title'], function (data) {
+  //   $('#title_process').html(data.tile);
+  // });
+
   // Convert seconds to timestamp
   function timestamp(value) {
     var sec_num = value;
@@ -133,10 +138,12 @@ $(document).ready(function () {
         var superBuffer = new Blob(fixedBlob, {
           type: 'video/mp4',
         });
+
         var url = window.URL.createObjectURL(superBuffer);
         chrome.downloads.download({
           url: url,
         });
+
         $('#download-label').html(chrome.i18n.getMessage('download'));
       });
     } else if ($('#format-select').val() == 'webm') {
@@ -162,11 +169,54 @@ $(document).ready(function () {
   function saveDrive() {
     downloaded = true;
 
-    chrome.storage.local.get(['token'], function (data) {
-      alert(JSON.stringify(data));
+    chrome.storage.local.get(['token', 'process_id'], function (data) {
+      console.log('token', data.token);
+      console.log('process_id', data.process_id);
+
+      $('#share span').html(chrome.i18n.getMessage('saving'));
+      $('#share').css('pointer-events', 'none');
+
+      // const response = await fetch(blobs).then((r) => r.blob());
+      // var metadata = {
+      //   name: 'video.mp4',
+      //   mimeType: 'video/mp4',
+      // };
+
+      var superBuffer = new Blob(blobs, {
+        type: 'video/webm',
+      });
+
+      const myFile = new File([superBuffer], `${data.process_id}.webm`, {
+        type: 'video/webm',
+      });
+
+      // const myFile = new File([response], `${data.process_id}.webm`, {
+      //   type: 'video/webm',
+      // });
+
+      var form = new FormData();
+
+      // form.append(
+      //   'metadata',
+      //   new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+      // );
+
+      form.append('file', myFile);
+
+      // Upload to Drive
+      var xhr = new XMLHttpRequest();
+      xhr.open(
+        'POST',
+        `https://samasc.cooasgo.com.br:3333/processes-mappings-of-files?process_mapping_id=${data.process_id}`
+      );
+      xhr.setRequestHeader('Authorization', 'Bearer ' + data.token);
+      xhr.responseType = 'json';
+
+      $('#share span').html('Salvar');
+      $('#share').css('pointer-events', 'all');
+
+      xhr.send(form);
     });
-    $('#share span').html(chrome.i18n.getMessage('saving'));
-    $('#share').css('pointer-events', 'none');
 
     // chrome.tabs.query({ active: true }, function (tabs) {
     //   const token = chrome.tabs.executeScript(tabs[0].id, {
@@ -174,46 +224,49 @@ $(document).ready(function () {
     //   });
     // }),
 
-    chrome.identity.getAuthToken({ interactive: true }, function (token) {
-      if (!token) {
-        return;
-      }
-      $('#share span').html(chrome.i18n.getMessage('saving'));
-      $('#share').css('pointer-events', 'none');
-      var metadata = {
-        name: 'video.mp4',
-        mimeType: 'video/mp4',
-      };
-      var superBuffer = new Blob(blobs, {
-        type: 'video/mp4',
-      });
-      var form = new FormData();
-      form.append(
-        'metadata',
-        new Blob([JSON.stringify(metadata)], { type: 'application/json' })
-      );
-      form.append('file', superBuffer);
+    // chrome.identity.getAuthToken({ interactive: true }, function (token) {
+    //   if (!token) {
+    //     return;
+    //   }
+    //   $('#share span').html(chrome.i18n.getMessage('saving'));
+    //   $('#share').css('pointer-events', 'none');
 
-      // Upload to Drive
-      var xhr = new XMLHttpRequest();
-      xhr.open(
-        'POST',
-        'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart'
-      );
-      xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-      xhr.responseType = 'json';
-      xhr.onload = () => {
-        var fileId = xhr.response.id;
-        $('#share span').html('Save to Drive');
-        $('#share').css('pointer-events', 'all');
+    //   var metadata = {
+    //     name: 'video.mp4',
+    //     mimeType: 'video/mp4',
+    //   };
+    //   var superBuffer = new Blob(blobs, {
+    //     type: 'video/mp4',
+    //   });
+    //   var form = new FormData();
+    //   form.append(
+    //     'metadata',
+    //     new Blob([JSON.stringify(metadata)], { type: 'application/json' })
+    //   );
+    //   form.append('file', superBuffer);
 
-        // Open file in Drive in a new tab
-        chrome.tabs.create({
-          url: 'https://drive.google.com/file/d/' + fileId,
-        });
-      };
-      xhr.send(form);
-    });
+    //   // Upload to Drive
+    //   var xhr = new XMLHttpRequest();
+    //   xhr.open(
+    //     'POST',
+    //     `https://samasc.cooasgo.com.br:3333/processes-mappings-of-files?process_mapping_id=${process_id}`
+    //   );
+
+    //   xhr.setRequestHeader('Authorization', 'Bearer ' + token);
+    //   xhr.responseType = 'json';
+
+    //   xhr.onload = () => {
+    //     var fileId = xhr.response.id;
+    //     $('#share span').html('Save to Drive');
+    //     $('#share').css('pointer-events', 'all');
+
+    //     // Open file in Drive in a new tab
+    //     chrome.tabs.create({
+    //       url: 'https://drive.google.com/file/d/' + fileId,
+    //     });
+    //   };
+    //   xhr.send(form);
+    // });
   }
 
   // Check when video has been loaded

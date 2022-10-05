@@ -25,6 +25,20 @@ var camerapos = { x: '10px', y: '10px' };
 var isMac = navigator.userAgentData.platform.toUpperCase().indexOf('MAC') >= 0;
 const streamSaver = window.streamSaver;
 
+chrome.browserAction.onClicked.addListener(function (tab) {
+  localStorage.tabToReload = tab.id;
+  chrome.runtime.reload();
+});
+
+function reloadTab() {
+  var tabID = localStorage.tabToReload;
+  if (tabID) {
+    chrome.tabs.reload(parseInt(tabID));
+    delete localStorage.tabToReload;
+  }
+}
+reloadTab();
+
 // Get list of available audio devices
 getDeviceId();
 
@@ -60,14 +74,11 @@ chrome.runtime.onInstalled.addListener(function () {
   });
 });
 
-chrome.runtime.onMessageExternal.addListener(function (
-  request,
-  sender,
-  sendResponse
-) {
+chrome.runtime.onMessageExternal.addListener(function (request) {
   chrome.storage.local.set({
     process_id: request.process_id,
     token: request.token,
+    title: request.title,
   });
 });
 

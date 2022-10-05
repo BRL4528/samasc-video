@@ -68,25 +68,6 @@ $(document).ready(function () {
     });
   }
 
-  //   chrome.runtime.onMessage.addListener(function (
-  //     request,
-  //     sender,
-  //     sendResponse
-  //   ) {
-  //     alert('mensagem content' + request.teste);
-
-  //     if (sender.url === blocklistedWebsite) return; // don't allow this web page access
-  //     if (request.teste) sendResponse(request.teste);
-  //   });
-
-  //   injectCode(true, countdownactive);
-
-  //   chrome.tabs.query({ active: true }, function (tabs) {
-  //     chrome.tabs.executeScript(tabs[0].id, {
-  //       code: 'alert(localStorage.getItem("@Samasc:user"))',
-  //     });
-  //   });
-
   injectCode(true, countdownactive);
 
   // Inject or remove all the content
@@ -246,9 +227,9 @@ $(document).ready(function () {
   // Countdown
   function injectCountdown(time) {
     var countdowninject =
-      "<div id='countdown'><img src='" +
+      "<section id='countdown'><img src='" +
       chrome.extension.getURL('./assets/images/3-countdown.svg') +
-      "'></div>";
+      "'></section>";
     $('#' + uniqueid).prepend(countdowninject);
     countdown(time);
   }
@@ -1566,17 +1547,6 @@ $(document).ready(function () {
   $(document).on('click', '#clear', function () {
     canvas.clear();
     ctx_free.clearRect(0, 0, canvas_free.width, canvas_free.height);
-  });
-
-  chrome.runtime.onMessageExternal.addListener(function (
-    request,
-    sender,
-    sendResponse
-  ) {
-    console.log('request', request);
-    alert('mensagem' + request.teste);
-    if (sender.url === blocklistedWebsite) return; // don't allow this web page access
-    if (request.teste) sendResponse(request.teste);
   });
 
   // Listen for popup/background/content messages

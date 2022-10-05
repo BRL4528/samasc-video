@@ -168,7 +168,7 @@
     "description": "Download button in video editor"
   },
   "save_drive": {
-    "message": "Salvar no Drive",
+    "message": "Salvar video",
     "description": "Save to Drive button in video editor"
   },
   "saving": {
